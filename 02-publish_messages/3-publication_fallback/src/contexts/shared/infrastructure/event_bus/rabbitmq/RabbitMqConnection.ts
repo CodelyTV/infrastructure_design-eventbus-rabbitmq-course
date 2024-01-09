@@ -46,10 +46,6 @@ export class RabbitMqConnection {
 			headers?: unknown;
 		},
 	): Promise<void> {
-		if (!this.amqpChannel) {
-			await this.connect();
-		}
-
 		return new Promise((resolve: Function, reject: Function) => {
 			this.channel().publish(exchange, routingKey, content, options, (error: unknown) =>
 				error ? reject(error) : resolve(),

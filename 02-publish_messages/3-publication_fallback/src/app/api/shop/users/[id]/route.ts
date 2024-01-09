@@ -3,6 +3,7 @@ import * as t from "io-ts";
 import { PathReporter } from "io-ts/PathReporter";
 import { NextRequest, NextResponse } from "next/server";
 
+import { DomainEventFailover } from "../../../../../contexts/shared/infrastructure/event_bus/failover/DomainEventFailover";
 import { RabbitMqConnection } from "../../../../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqConnection";
 import { RabbitMqEventBus } from "../../../../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqEventBus";
 import { MariaDBConnection } from "../../../../../contexts/shared/infrastructure/MariaDBConnection";
@@ -27,9 +28,11 @@ export async function PUT(
 
 	const body = validatedRequest.right;
 
+	const mariaDBConnection = new MariaDBConnection();
+
 	await new UserRegistrar(
-		new MySqlUserRepository(new MariaDBConnection()),
-		new RabbitMqEventBus(new RabbitMqConnection()),
+		new MySqlUserRepository(mariaDBConnection),
+		new RabbitMqEventBus(new RabbitMqConnection(), new DomainEventFailover(mariaDBConnection)),
 	).registrar(id, body.name, body.email, body.profilePicture);
 
 	return new Response("", { status: 201 });

@@ -1,6 +1,6 @@
 version: '3'
 services:
-  2-publish_events_to_rabbitmq-mysql:
+  3-publication_fallback-mysql:
     image: mariadb:latest
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
       - db_data:/var/lib/mysql
       - ./databases/ecommerce.sql:/docker-entrypoint-initdb.d/init.sql
 
-  2-publish_events_to_rabbitmq-rabbitmq:
+  3-publication_fallback-rabbitmq:
     image: 'rabbitmq:3.12-management'
     restart: unless-stopped
     ports:
