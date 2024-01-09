@@ -1,6 +1,6 @@
 version: '3'
 services:
-  3-view_projections-2-wit_projections:
+  2-publish_events_to_rabbitmq-mysql:
     image: mariadb:latest
     restart: always
     environment:
@@ -14,6 +14,16 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./databases/ecommerce.sql:/docker-entrypoint-initdb.d/init.sql
+
+  2-publish_events_to_rabbitmq-rabbitmq:
+    image: 'rabbitmq:3.12-management'
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=codely
+      - RABBITMQ_DEFAULT_PASS=codely
 
 volumes:
   db_data:

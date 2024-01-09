@@ -8,7 +8,20 @@ export class WelcomeEmailSentDomainEvent extends DomainEvent {
 		public readonly fromEmailAddress: string,
 		public readonly toEmailAddress: string,
 		public readonly emailBody: string,
+		eventId?: string,
+		occurredOn?: Date,
 	) {
-		super("welcome_email.sent");
+		super("welcome_email.sent", id, eventId, occurredOn);
+	}
+
+	toPrimitives(): { [key: string]: unknown } {
+		return {
+			id: this.id,
+			userId: this.userId,
+			userName: this.userName,
+			fromEmailAddress: this.fromEmailAddress,
+			toEmailAddress: this.toEmailAddress,
+			emailBody: this.emailBody,
+		};
 	}
 }

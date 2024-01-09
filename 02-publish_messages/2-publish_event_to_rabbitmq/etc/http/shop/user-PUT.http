@@ -3,5 +3,6 @@ Content-Type: application/json
 
 {
   "name": "Javier Ferrer",
+  "email": "javierferrer@gmail.com",
   "profilePicture": "https://"
 }
