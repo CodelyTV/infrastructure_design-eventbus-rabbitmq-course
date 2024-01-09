@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  shared_rabbitmq:
+    container_name: codely-rabbitmq_course-rabbitmq
+    image: 'rabbitmq:3.12-management'
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=codely
+      - RABBITMQ_DEFAULT_PASS=codely
