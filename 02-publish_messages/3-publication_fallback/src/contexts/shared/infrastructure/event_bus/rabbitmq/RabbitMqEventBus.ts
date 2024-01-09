@@ -12,22 +12,35 @@ export class RabbitMqEventBus implements EventBus {
 
 	async publish(events: DomainEvent[]): Promise<void> {
 		const promises = events.map(async (event) => {
-			const routingKey = event.eventName;
 			const serializedEvent = DomainEventJsonSerializer.serialize(event);
 
-			try {
-				await this.connection.publish("domain_events", routingKey, Buffer.from(serializedEvent), {
-					messageId: event.eventId,
-					contentType: "application/json",
-					contentEncoding: "utf-8",
-				});
-
-				return;
-			} catch (error: unknown) {
-				return this.failover.publish(serializedEvent);
-			}
+			await this.publishRaw(event.eventId, event.eventName, serializedEvent);
 		});
 
 		await Promise.all(promises);
+	}
+
+	async publishFromFailover(): Promise<void> {
+		await this.connection.connect();
+
+		const events = await this.failover.consume(10);
+
+		await Promise.all(
+			events.map((event) => this.publishRaw(event.eventId, event.eventName, event.body)),
+		);
+	}
+
+	private async publishRaw(eventId: string, eventName: string, serializedEvent: string) {
+		try {
+			await this.connection.publish("domain_events", eventName, Buffer.from(serializedEvent), {
+				messageId: eventId,
+				contentType: "application/json",
+				contentEncoding: "utf-8",
+			});
+
+			return;
+		} catch (error: unknown) {
+			return this.failover.publish(eventId, eventName, serializedEvent);
+		}
 	}
 }

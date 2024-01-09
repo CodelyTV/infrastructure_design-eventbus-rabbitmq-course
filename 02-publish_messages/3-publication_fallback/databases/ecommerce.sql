@@ -4,6 +4,8 @@
 
 CREATE TABLE shared__failover_domain_events (
 	id INT AUTO_INCREMENT PRIMARY KEY,
+	eventId UUID NOT NULL,
+	eventName VARCHAR(255) NOT NULL,
 	body TEXT NOT NULL
 );
 
