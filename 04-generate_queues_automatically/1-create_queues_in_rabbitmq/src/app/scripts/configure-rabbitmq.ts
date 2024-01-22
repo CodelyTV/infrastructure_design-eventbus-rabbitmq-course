@@ -6,15 +6,15 @@ const exchangeName = "domain_events";
 
 const queues: {
 	name: string;
-	bindingKey: string;
+	bindingKeys: string[];
 }[] = [
 	{
 		name: "codely.retention.send_welcome_email_on_user_registered",
-		bindingKey: "codely.shop.user.registered",
+		bindingKeys: ["codely.shop.user.registered"],
 	},
 	{
 		name: "codely.retention.update_last_activity_date_on_user_updated",
-		bindingKey: "codely.shop.user.*",
+		bindingKeys: ["codely.shop.user.*"],
 	},
 ];
 
@@ -24,7 +24,7 @@ async function main(): Promise<void> {
 	await connection.declareExchange(exchangeName);
 
 	await Promise.all(
-		queues.map((queue) => connection.declareQueue(queue.name, exchangeName, queue.bindingKey)),
+		queues.map((queue) => connection.declareQueue(queue.name, exchangeName, queue.bindingKeys)),
 	);
 
 	await connection.close();

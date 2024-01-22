@@ -53,14 +53,16 @@ export class RabbitMqConnection {
 		});
 	}
 
-	async declareQueue(name: string, exchangeName: string, bindingKey: string): Promise<void> {
+	async declareQueue(name: string, exchangeName: string, bindingKeys: string[]): Promise<void> {
 		await this.channel().assertQueue(name, {
 			exclusive: false,
 			durable: true,
 			autoDelete: false,
 		});
 
-		await this.channel().bindQueue(name, exchangeName, bindingKey);
+		await Promise.all(
+			bindingKeys.map((bindingKey) => this.channel().bindQueue(name, exchangeName, bindingKey)),
+		);
 	}
 
 	async declareExchange(exchangeName: string): Promise<void> {
