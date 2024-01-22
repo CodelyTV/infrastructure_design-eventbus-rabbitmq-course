@@ -7,16 +7,22 @@ import { RabbitMqConnection } from "../../contexts/shared/infrastructure/event_b
 
 const connection = new RabbitMqConnection();
 
+const retrySuffix = ".retry";
+const deadLetterSuffix = ".dead_letter";
+
 const exchangeName = "domain_events";
+const retryExchange = `${exchangeName}${retrySuffix}`;
+const deadLetterExchange = `${exchangeName}${deadLetterSuffix}`;
 
 const subscribers = container
 	.findTaggedServiceIdentifiers<DomainEventSubscriber<DomainEvent>>("subscriber")
 	.map((id) => container.get(id));
 
-const queues: {
+type Queue = {
 	name: string;
 	bindingKeys: string[];
-}[] = subscribers.map((subscriber) => ({
+};
+const queues: Queue[] = subscribers.map((subscriber) => ({
 	name: subscriber.name(),
 	bindingKeys: subscriber.subscribedTo().map((event) => event.eventName),
 }));
@@ -25,12 +31,29 @@ async function main(): Promise<void> {
 	await connection.connect();
 
 	await connection.declareExchange(exchangeName);
+	await connection.declareExchange(retryExchange);
+	await connection.declareExchange(deadLetterExchange);
 
-	await Promise.all(
-		queues.map((queue) => connection.declareQueue(queue.name, exchangeName, queue.bindingKeys)),
-	);
+	await Promise.all(queues.map((queue) => declareQueue(connection, queue)));
 
 	await connection.close();
+}
+
+async function declareQueue(connection: RabbitMqConnection, queue: Queue): Promise<void> {
+	await connection.declareQueue(queue.name, exchangeName, [...queue.bindingKeys, queue.name]);
+
+	const retryQueueName = `${queue.name}${retrySuffix}`;
+	await connection.declareQueue(
+		retryQueueName,
+		retryExchange,
+		[queue.name],
+		exchangeName,
+		queue.name,
+		1000,
+	);
+
+	const deadLetterQueueName = `${queue.name}${deadLetterSuffix}`;
+	await connection.declareQueue(deadLetterQueueName, deadLetterExchange, [queue.name]);
 }
 
 main().catch(console.error);

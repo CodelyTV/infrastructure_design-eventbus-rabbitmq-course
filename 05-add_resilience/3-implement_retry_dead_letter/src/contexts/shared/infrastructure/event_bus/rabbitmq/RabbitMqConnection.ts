@@ -67,11 +67,19 @@ export class RabbitMqConnection {
 		this.channel().ack(message);
 	}
 
-	async declareQueue(name: string, exchangeName: string, bindingKeys: string[]): Promise<void> {
+	async declareQueue(
+		name: string,
+		exchangeName: string,
+		bindingKeys: string[],
+		deadLetterExchange?: string,
+		deadLetterQueue?: string,
+		messageTtl?: number,
+	): Promise<void> {
 		await this.channel().assertQueue(name, {
 			exclusive: false,
 			durable: true,
 			autoDelete: false,
+			arguments: this.generateQueueArguments(deadLetterExchange, deadLetterQueue, messageTtl),
 		});
 
 		await Promise.all(
@@ -121,5 +129,17 @@ export class RabbitMqConnection {
 		await channel.prefetch(1);
 
 		return channel;
+	}
+
+	private generateQueueArguments(
+		deadLetterExchange?: string,
+		deadLetterQueue?: string,
+		messageTtl?: number,
+	) {
+		return {
+			...(deadLetterExchange && { "x-dead-letter-exchange": deadLetterExchange }),
+			...(deadLetterQueue && { "x-dead-letter-routing-key": deadLetterQueue }),
+			...(messageTtl !== undefined && { "x-message-ttl": messageTtl }),
+		};
 	}
 }
