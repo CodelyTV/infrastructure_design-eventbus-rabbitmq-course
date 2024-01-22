@@ -1,6 +1,6 @@
-import { DomainEvent } from "../../../shared/domain/event/DomainEvent";
+import { UserDomainEvent } from "./UserDomainEvent";
 
-export class UserRegisteredDomainEvent extends DomainEvent {
+export class UserRegisteredDomainEvent extends UserDomainEvent {
 	static eventName = "codely.shop.user.registered";
 
 	constructor(
@@ -12,7 +12,7 @@ export class UserRegisteredDomainEvent extends DomainEvent {
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(UserRegisteredDomainEvent.eventName, id, eventId, occurredOn);
+		super(id, eventId, occurredOn);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {
