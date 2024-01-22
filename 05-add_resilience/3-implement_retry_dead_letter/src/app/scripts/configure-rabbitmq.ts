@@ -3,16 +3,16 @@ import "reflect-metadata";
 import { DomainEvent } from "../../contexts/shared/domain/event/DomainEvent";
 import { DomainEventSubscriber } from "../../contexts/shared/domain/event/DomainEventSubscriber";
 import { container } from "../../contexts/shared/infrastructure/dependency_injection/diod.config";
-import { RabbitMqConnection } from "../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqConnection";
+import {
+	deadLetterExchange,
+	deadLetterSuffix,
+	exchangeName,
+	RabbitMqConnection,
+	retryExchange,
+	retrySuffix,
+} from "../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqConnection";
 
 const connection = new RabbitMqConnection();
-
-const retrySuffix = ".retry";
-const deadLetterSuffix = ".dead_letter";
-
-const exchangeName = "domain_events";
-const retryExchange = `${exchangeName}${retrySuffix}`;
-const deadLetterExchange = `${exchangeName}${deadLetterSuffix}`;
 
 const subscribers = container
 	.findTaggedServiceIdentifiers<DomainEventSubscriber<DomainEvent>>("subscriber")
@@ -49,7 +49,7 @@ async function declareQueue(connection: RabbitMqConnection, queue: Queue): Promi
 		[queue.name],
 		exchangeName,
 		queue.name,
-		1000,
+		3000,
 	);
 
 	const deadLetterQueueName = `${queue.name}${deadLetterSuffix}`;

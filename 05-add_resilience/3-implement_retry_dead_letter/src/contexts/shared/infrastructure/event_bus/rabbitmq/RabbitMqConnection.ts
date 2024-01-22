@@ -1,6 +1,13 @@
 import amqplib, { ConsumeMessage } from "amqplib";
 import { Service } from "diod";
 
+export const retrySuffix = ".retry";
+export const deadLetterSuffix = ".dead_letter";
+
+export const exchangeName = "domain_events";
+export const retryExchange = `${exchangeName}${retrySuffix}`;
+export const deadLetterExchange = `${exchangeName}${deadLetterSuffix}`;
+
 export type Settings = {
 	username: string;
 	password: string;
@@ -53,6 +60,18 @@ export class RabbitMqConnection {
 				error ? reject(error) : resolve(),
 			);
 		});
+	}
+
+	async publishToRetry(message: ConsumeMessage, queue: string): Promise<void> {
+		const options = this.generateMessageOptionsFromMessageToRepublish(message);
+
+		await this.publish(retryExchange, queue, message.content, options);
+	}
+
+	async publishToDeadLetter(message: ConsumeMessage, queue: string): Promise<void> {
+		const options = this.generateMessageOptionsFromMessageToRepublish(message);
+
+		await this.publish(deadLetterExchange, queue, message.content, options);
 	}
 
 	async consume(queue: string, subscriber: (message: ConsumeMessage) => {}): Promise<void> {
@@ -141,5 +160,32 @@ export class RabbitMqConnection {
 			...(deadLetterQueue && { "x-dead-letter-routing-key": deadLetterQueue }),
 			...(messageTtl !== undefined && { "x-message-ttl": messageTtl }),
 		};
+	}
+
+	private generateMessageOptionsFromMessageToRepublish(message: ConsumeMessage) {
+		const { messageId, contentType, contentEncoding, priority } = message.properties;
+
+		return {
+			messageId,
+			headers: this.incrementRedeliveryCount(message),
+			contentType,
+			contentEncoding,
+			priority,
+		};
+	}
+
+	private incrementRedeliveryCount(message: ConsumeMessage) {
+		if (this.hasBeenRedelivered(message)) {
+			const count = parseInt(message.properties.headers["redelivery_count"], 10);
+			message.properties.headers["redelivery_count"] = count + 1;
+		} else {
+			message.properties.headers["redelivery_count"] = 1;
+		}
+
+		return message.properties.headers;
+	}
+
+	private hasBeenRedelivered(message: ConsumeMessage) {
+		return message.properties.headers["redelivery_count"] !== undefined;
 	}
 }

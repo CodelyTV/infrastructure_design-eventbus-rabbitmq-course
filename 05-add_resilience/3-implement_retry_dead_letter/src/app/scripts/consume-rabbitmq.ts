@@ -10,6 +10,7 @@ import { DomainEventJsonDeserializer } from "../../contexts/shared/infrastructur
 import { RabbitMqConnection } from "../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqConnection";
 
 const connection = new RabbitMqConnection();
+const maxRetries = 3;
 
 const subscribers = container
 	.findTaggedServiceIdentifiers<DomainEventSubscriber<DomainEvent>>("subscriber")
@@ -38,9 +39,40 @@ function consume(subscriber: DomainEventSubscriber<DomainEvent>) {
 		const content = message.content.toString();
 		const domainEvent = deserializer.deserialize(content);
 
-		await subscriber.on(domainEvent);
-		await connection.ack(message);
+		try {
+			await subscriber.on(domainEvent);
+		} catch (error) {
+			await handleError(message, subscriber.name());
+		} finally {
+			await connection.ack(message);
+		}
 	};
+}
+
+async function handleError(message: ConsumeMessage, queueName: string): Promise<void> {
+	console.log(`Error consuming ${message.fields.routingKey}`);
+
+	if (hasBeenRedeliveredTooMuch(message)) {
+		console.log(`--- To dead letter`);
+		await connection.publishToDeadLetter(message, queueName);
+	} else {
+		console.log(`--- To retry`);
+		await connection.publishToRetry(message, queueName);
+	}
+}
+
+function hasBeenRedeliveredTooMuch(message: ConsumeMessage): boolean {
+	if (hasBeenRedelivered(message)) {
+		const count = parseInt(message.properties.headers["redelivery_count"], 10);
+
+		return count >= maxRetries;
+	}
+
+	return false;
+}
+
+function hasBeenRedelivered(message: ConsumeMessage): boolean {
+	return message.properties.headers["redelivery_count"] !== undefined;
 }
 
 main().catch(console.error);
