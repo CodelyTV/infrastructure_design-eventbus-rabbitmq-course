@@ -1,22 +1,25 @@
+import "reflect-metadata";
+
+import { DomainEvent } from "../../contexts/shared/domain/event/DomainEvent";
+import { DomainEventSubscriber } from "../../contexts/shared/domain/event/DomainEventSubscriber";
+import { container } from "../../contexts/shared/infrastructure/dependency_injection/diod.config";
 import { RabbitMqConnection } from "../../contexts/shared/infrastructure/event_bus/rabbitmq/RabbitMqConnection";
 
 const connection = new RabbitMqConnection();
 
 const exchangeName = "domain_events";
 
+const subscribers = container
+	.findTaggedServiceIdentifiers<DomainEventSubscriber<DomainEvent>>("subscriber")
+	.map((id) => container.get(id));
+
 const queues: {
 	name: string;
 	bindingKeys: string[];
-}[] = [
-	{
-		name: "codely.retention.send_welcome_email_on_user_registered",
-		bindingKeys: ["codely.shop.user.registered"],
-	},
-	{
-		name: "codely.retention.update_last_activity_date_on_user_updated",
-		bindingKeys: ["codely.shop.user.*"],
-	},
-];
+}[] = subscribers.map((subscriber) => ({
+	name: subscriber.name(),
+	bindingKeys: subscriber.subscribedTo().map((event) => event.eventName),
+}));
 
 async function main(): Promise<void> {
 	await connection.connect();

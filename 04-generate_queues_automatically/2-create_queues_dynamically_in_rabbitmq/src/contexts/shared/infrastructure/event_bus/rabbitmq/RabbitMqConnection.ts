@@ -1,4 +1,5 @@
 import amqplib from "amqplib";
+import { Service } from "diod";
 
 export type Settings = {
 	username: string;
@@ -10,6 +11,7 @@ export type Settings = {
 	};
 };
 
+@Service()
 export class RabbitMqConnection {
 	private amqpConnection?: amqplib.Connection;
 	private amqpChannel?: amqplib.ConfirmChannel;

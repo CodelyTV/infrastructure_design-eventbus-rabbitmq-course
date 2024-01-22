@@ -1,9 +1,12 @@
+import { Service } from "diod";
+
 import { DomainEvent } from "../../../domain/event/DomainEvent";
 import { EventBus } from "../../../domain/event/EventBus";
 import { DomainEventJsonSerializer } from "../DomainEventJsonSerializer";
 import { DomainEventFailover } from "../failover/DomainEventFailover";
 import { RabbitMqConnection } from "./RabbitMqConnection";
 
+@Service()
 export class RabbitMqEventBus implements EventBus {
 	constructor(
 		private readonly connection: RabbitMqConnection,

@@ -1,6 +1,6 @@
 version: '3'
 services:
-  1-create_queues-mysql:
+  2-create_dynamic_queues-mysql:
     image: mariadb:latest
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
       - db_data:/var/lib/mysql
       - ./databases/ecommerce.sql:/docker-entrypoint-initdb.d/init.sql
 
-  1-create_queues-rabbitmq:
+  2-create_dynamic_queues-rabbitmq:
     image: 'rabbitmq:3.12-management'
     restart: unless-stopped
     ports:
