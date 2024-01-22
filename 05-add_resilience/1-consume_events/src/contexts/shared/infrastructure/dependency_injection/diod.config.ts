@@ -7,7 +7,7 @@ import { FakeEmailSender } from "../../../retention/email/infrastructure/FakeEma
 import { UpdateLastActivityDateOnUserUpdated } from "../../../retention/user/application/update_last_activity_date/UpdateLastActivityDateOnUserUpdated";
 import { UserLastActivityUpdater } from "../../../retention/user/application/update_last_activity_date/UserLastActivityUpdater";
 import { RetentionUserRepository } from "../../../retention/user/domain/RetentionUserRepository";
-import { FakeRetentionUserRepository } from "../../../retention/user/infrastructure/FakeRetentionUserRepository";
+import { MySqlRetentionUserRepository } from "../../../retention/user/infrastructure/MySqlRetentionUserRepository";
 import { EventBus } from "../../domain/event/EventBus";
 import { UuidGenerator } from "../../domain/UuidGenerator";
 import { DomainEventFailover } from "../event_bus/failover/DomainEventFailover";
@@ -32,6 +32,6 @@ builder.register(EmailSender).use(FakeEmailSender);
 
 builder.registerAndUse(UpdateLastActivityDateOnUserUpdated).addTag("subscriber");
 builder.registerAndUse(UserLastActivityUpdater);
-builder.register(RetentionUserRepository).use(FakeRetentionUserRepository);
+builder.register(RetentionUserRepository).use(MySqlRetentionUserRepository);
 
 export const container = builder.build();

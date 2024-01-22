@@ -12,7 +12,7 @@ export class UserRegisteredDomainEvent extends UserDomainEvent {
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(id, eventId, occurredOn);
+		super(UserRegisteredDomainEvent.eventName, id, eventId, occurredOn);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {

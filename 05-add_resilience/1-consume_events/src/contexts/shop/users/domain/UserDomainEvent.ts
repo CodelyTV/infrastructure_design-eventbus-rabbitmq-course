@@ -1,14 +1,24 @@
-import { DomainEvent } from "../../../shared/domain/event/DomainEvent";
+import { DomainEvent, DomainEventAttributes } from "../../../shared/domain/event/DomainEvent";
 
 export class UserDomainEvent extends DomainEvent {
 	static eventName = "codely.shop.user.*";
 
 	constructor(
+		eventName: string,
 		public readonly id: string,
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(UserDomainEvent.eventName, id, eventId, occurredOn);
+		super(eventName, id, eventId, occurredOn);
+	}
+
+	static fromPrimitives(
+		aggregateId: string,
+		eventId: string,
+		occurredOn: Date,
+		_attributes: DomainEventAttributes,
+	): UserDomainEvent {
+		return new UserDomainEvent(UserDomainEvent.eventName, aggregateId, eventId, occurredOn);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {

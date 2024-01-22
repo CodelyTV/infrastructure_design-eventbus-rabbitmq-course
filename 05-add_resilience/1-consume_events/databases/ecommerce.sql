@@ -24,6 +24,15 @@ CREATE TABLE seller_backoffice__products (
 	creation_date TIMESTAMP
 );
 
+/* -------------------------
+     RETENTION CONTEXT
+---------------------------- */
+
+CREATE TABLE retention__users (
+	id UUID PRIMARY KEY,
+	last_activity_date TIMESTAMP
+);
+
 
 /* -------------------------
         SHOP CONTEXT
@@ -33,7 +42,8 @@ CREATE TABLE shop__users (
 	id UUID PRIMARY KEY,
 	name VARCHAR(255),
 	email VARCHAR(255),
-	profile_picture VARCHAR(255)
+	profile_picture VARCHAR(255),
+	status VARCHAR(255)
 );
 
 CREATE TABLE shop__product_reviews (

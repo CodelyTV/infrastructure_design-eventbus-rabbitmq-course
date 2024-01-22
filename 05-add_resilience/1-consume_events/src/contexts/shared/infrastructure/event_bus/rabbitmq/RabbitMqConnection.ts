@@ -1,4 +1,4 @@
-import amqplib from "amqplib";
+import amqplib, { ConsumeMessage } from "amqplib";
 import { Service } from "diod";
 
 export type Settings = {
@@ -53,6 +53,18 @@ export class RabbitMqConnection {
 				error ? reject(error) : resolve(),
 			);
 		});
+	}
+
+	async consume(queue: string, subscriber: (message: ConsumeMessage) => {}): Promise<void> {
+		await this.channel().consume(queue, (message: ConsumeMessage | null) => {
+			if (message) {
+				subscriber(message);
+			}
+		});
+	}
+
+	async ack(message: ConsumeMessage): Promise<void> {
+		this.channel().ack(message);
 	}
 
 	async declareQueue(name: string, exchangeName: string, bindingKeys: string[]): Promise<void> {

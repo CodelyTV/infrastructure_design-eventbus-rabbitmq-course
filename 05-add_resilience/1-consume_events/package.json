@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "configure-rabbitmq": "ts-node ./src/app/scripts/configure-rabbitmq.ts"
+    "configure-rabbitmq": "ts-node ./src/app/scripts/configure-rabbitmq.ts",
+    "consume-rabbitmq": "ts-node ./src/app/scripts/consume-rabbitmq.ts"
   },
   "dependencies": {
     "@types/node": "20.5.3",

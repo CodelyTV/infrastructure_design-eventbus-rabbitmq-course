@@ -4,11 +4,12 @@ export class UserDomainEvent extends DomainEvent {
 	static eventName = "codely.shop.user.*";
 
 	constructor(
+		eventName: string,
 		public readonly id: string,
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(UserDomainEvent.eventName, id, eventId, occurredOn);
+		super(eventName, id, eventId, occurredOn);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {

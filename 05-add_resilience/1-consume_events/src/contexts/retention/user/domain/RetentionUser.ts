@@ -11,6 +11,10 @@ export class RetentionUser {
 		private lastActivityDate: Date,
 	) {}
 
+	static create(id: string, occurredOn: Date): RetentionUser {
+		return new RetentionUser(new UserId(id), occurredOn);
+	}
+
 	static fromPrimitives(primitives: RetentionUserPrimitives): RetentionUser {
 		return new RetentionUser(new UserId(primitives.id), primitives.lastActivityDate);
 	}
@@ -27,6 +31,6 @@ export class RetentionUser {
 	}
 
 	lastActivityDateIsOlderThan(other: Date): boolean {
-		return this.lastActivityDate < other;
+		return this.lastActivityDate <= other;
 	}
 }

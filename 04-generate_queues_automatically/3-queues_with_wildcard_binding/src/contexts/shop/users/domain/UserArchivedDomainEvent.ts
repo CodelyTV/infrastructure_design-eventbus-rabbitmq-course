@@ -8,7 +8,7 @@ export class UserArchivedDomainEvent extends UserDomainEvent {
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(id, eventId, occurredOn);
+		super(UserArchivedDomainEvent.eventName, id, eventId, occurredOn);
 	}
 
 	toPrimitives(): { [key: string]: unknown } {

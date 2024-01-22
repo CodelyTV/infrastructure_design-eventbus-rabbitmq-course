@@ -14,7 +14,7 @@ export class UserEmailUpdatedDomainEvent extends UserDomainEvent {
 		eventId?: string,
 		occurredOn?: Date,
 	) {
-		super(id, eventId, occurredOn);
+		super(UserEmailUpdatedDomainEvent.eventName, id, eventId, occurredOn);
 	}
 
 	toPrimitives(): UserEmailUpdatedDomainEventPrimitives {
