@@ -53,6 +53,20 @@ export class RabbitMqConnection {
 		});
 	}
 
+	async declareQueue(name: string, exchangeName: string, bindingKey: string): Promise<void> {
+		await this.channel().assertQueue(name, {
+			exclusive: false,
+			durable: true,
+			autoDelete: false,
+		});
+
+		await this.channel().bindQueue(name, exchangeName, bindingKey);
+	}
+
+	async declareExchange(exchangeName: string): Promise<void> {
+		await this.channel().assertExchange(exchangeName, "topic", { durable: true });
+	}
+
 	private connection(): amqplib.Connection {
 		if (!this.amqpConnection) {
 			throw new Error("RabbitMQ not connected");
