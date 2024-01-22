@@ -62,20 +62,20 @@ export class RabbitMqConnection {
 		});
 	}
 
-	async publishToRetry(message: ConsumeMessage, queue: string): Promise<void> {
+	async publishToRetry(message: ConsumeMessage, queueName: string): Promise<void> {
 		const options = this.generateMessageOptionsFromMessageToRepublish(message);
 
-		await this.publish(retryExchange, queue, message.content, options);
+		await this.publish(retryExchange, queueName, message.content, options);
 	}
 
-	async publishToDeadLetter(message: ConsumeMessage, queue: string): Promise<void> {
+	async publishToDeadLetter(message: ConsumeMessage, queueName: string): Promise<void> {
 		const options = this.generateMessageOptionsFromMessageToRepublish(message);
 
-		await this.publish(deadLetterExchange, queue, message.content, options);
+		await this.publish(deadLetterExchange, queueName, message.content, options);
 	}
 
-	async consume(queue: string, subscriber: (message: ConsumeMessage) => {}): Promise<void> {
-		await this.channel().consume(queue, (message: ConsumeMessage | null) => {
+	async consume(queueName: string, subscriber: (message: ConsumeMessage) => {}): Promise<void> {
+		await this.channel().consume(queueName, (message: ConsumeMessage | null) => {
 			if (message) {
 				subscriber(message);
 			}
