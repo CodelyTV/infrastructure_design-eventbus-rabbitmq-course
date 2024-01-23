@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "configure-rabbitmq": "tsx ./src/app/scripts/configure-rabbitmq.ts"
+    "configure-rabbitmq": "ts-node ./src/app/scripts/configure-rabbitmq.ts"
   },
   "dependencies": {
     "@types/node": "20.5.3",
@@ -37,6 +37,6 @@
     "eslint-config-codely": "^3.0.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.1",
-    "tsx": "^4.7.0"
+    "ts-node": "^10.9.2"
   }
 }
